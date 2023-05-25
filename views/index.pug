@@ -5,10 +5,15 @@ html(lang='en')
         title
     body
         h1 Hello world!
-        h1 please log in
-        form(action="/log-in" method="POST")
-            label(for="username") Username
-            input(name="username" placeholder="username" type="text")
-            label(for="password") Password
-            input(name="password" type="password")
-            button Log In
+        if currentUser
+            h1 Hello #{currentUser.username}!
+            form(action='/log-out' method='POST')
+                button Log Out
+        else
+            h1 please log in
+            form(action="/log-in" method="POST")
+                label(for="username") Username
+                input(name="username" placeholder="username" type="text")
+                label(for="password") Password
+                input(name="password" type="password")
+                button Log In

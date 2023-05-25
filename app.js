@@ -3,6 +3,7 @@ const path = require("path");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const bycript = require("bcryptjs");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 require("dotenv").config();
@@ -31,7 +32,12 @@ passport.use(
       if (!user) {
         return done(null, false, { message: "Incorrect username" });
       }
-      if (user.password !== password) {
+      const passwordMatchesTheHashedPass = await bycript.compare(
+        password,
+        user.password
+      );
+
+      if (!passwordMatchesTheHashedPass) {
         return done(null, false, { message: "Incorrect password" });
       }
       return done(null, user);
@@ -65,18 +71,24 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
-app.use((req,res,next)=>{
+app.use((req, res, next) => {
   res.locals.currentUser = req.user;
   next();
-})
+});
 
-app.get("/", (req, res) => res.render("index"));
+app.get("/", (req, res) => {
+  res.render("index");
+});
+
 app.get("/sign-up", (req, res) => res.render("sign_up_form"));
 app.post("/sign-up", async (req, res, next) => {
   try {
+    const { username, password } = req.body;
+    const hashedPassword = await bycript.hash(password, 10);
+
     const user = new User({
-      username: req.body.username,
-      password: req.body.password,
+      username: username,
+      password: hashedPassword,
     });
 
     const result = await user.save();
@@ -88,16 +100,19 @@ app.post("/sign-up", async (req, res, next) => {
 
 app.post(
   "/log-in",
-  passport.authenticate("local", { successRedirect: "/", failureRedirect: "/" })
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/",
+  })
 );
 
-app.post('/log-out',(req,res,next)=>{
-  req.logOut((err)=>{
-    if(err){
-      return next(err)
+app.post("/log-out", (req, res, next) => {
+  req.logOut((err) => {
+    if (err) {
+      return next(err);
     }
-    res.redirect('/')
-  })
-})
+    res.redirect("/");
+  });
+});
 
 app.listen(3000, () => console.log("app listening on port 3000!"));

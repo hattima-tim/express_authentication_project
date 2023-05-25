@@ -5,6 +5,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const bycript = require("bcryptjs");
 const mongoose = require("mongoose");
+const flash = require("connect-flash");
 const Schema = mongoose.Schema;
 require("dotenv").config();
 
@@ -24,6 +25,7 @@ const User = mongoose.model(
 const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
+app.use(flash());
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
@@ -77,7 +79,9 @@ app.use((req, res, next) => {
 });
 
 app.get("/", (req, res) => {
-  res.render("index");
+  const errorMessages = req.flash("error");
+
+  res.render("index", { errorMessages: errorMessages });
 });
 
 app.get("/sign-up", (req, res) => res.render("sign_up_form"));
@@ -103,6 +107,7 @@ app.post(
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/",
+    failureFlash: true,
   })
 );
 

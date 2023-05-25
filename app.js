@@ -96,7 +96,13 @@ app.post("/sign-up", async (req, res, next) => {
     });
 
     const result = await user.save();
-    res.redirect("/");
+    req.login(user,(err)=>{
+      if(err){
+        res.status(401).send('User not authenticated');
+      }else{
+        res.redirect('/')
+      }
+    })
   } catch (err) {
     return next(err);
   }

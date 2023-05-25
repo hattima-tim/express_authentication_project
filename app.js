@@ -21,7 +21,7 @@ const User = mongoose.model(
 );
 
 const app = express();
-app.set("views", __dirname);
+app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
 app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));

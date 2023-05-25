@@ -24,7 +24,13 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
-app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
@@ -37,7 +43,7 @@ app.post('/sign-up', async(req,res,next)=>{
       username: req.body.username,
       password: req.body.password,
     });
-    
+
     const result = await user.save();
     res.redirect("/");
   } catch (err) {

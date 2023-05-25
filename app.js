@@ -10,7 +10,7 @@ require("dotenv").config();
 const mongoDb = process.env.mongoUrl;
 mongoose.connect(mongoDb);
 const db = mongoose.connection;
-db.on("error",()=> console.error("mongo connection error"));
+db.on("error", () => console.error("mongo connection error"));
 
 const User = mongoose.model(
   "User",
@@ -65,9 +65,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
+app.use((req,res,next)=>{
+  res.locals.currentUser = req.user;
+  next();
+})
+
 app.get("/", (req, res) => res.render("index"));
-app.get('/sign-up',(req,res)=> res.render('sign_up_form'))
-app.post('/sign-up', async(req,res,next)=>{
+app.get("/sign-up", (req, res) => res.render("sign_up_form"));
+app.post("/sign-up", async (req, res, next) => {
   try {
     const user = new User({
       username: req.body.username,
@@ -79,6 +84,11 @@ app.post('/sign-up', async(req,res,next)=>{
   } catch (err) {
     return next(err);
   }
-})
+});
+
+app.post(
+  "/log-in",
+  passport.authenticate("local", { successRedirect: "/", failureRedirect: "/" })
+);
 
 app.listen(3000, () => console.log("app listening on port 3000!"));

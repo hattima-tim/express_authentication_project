@@ -91,4 +91,13 @@ app.post(
   passport.authenticate("local", { successRedirect: "/", failureRedirect: "/" })
 );
 
+app.post('/log-out',(req,res,next)=>{
+  req.logOut((err)=>{
+    if(err){
+      return next(err)
+    }
+    res.redirect('/')
+  })
+})
+
 app.listen(3000, () => console.log("app listening on port 3000!"));

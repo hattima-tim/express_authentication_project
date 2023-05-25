@@ -17,3 +17,7 @@ html(lang='en')
                 label(for="password") Password
                 input(name="password" type="password")
                 button Log In
+            if errorMessages
+                ul
+                    each msg in errorMessages
+                        li= msg
